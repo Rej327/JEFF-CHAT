@@ -102,6 +102,7 @@ app.get("/profile", (req, res) => {
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   const foundUser = await User.findOne({ username });
+
   if (foundUser) {
     const passOk = bcrypt.compareSync(password, foundUser.password);
     if (passOk) {
@@ -115,6 +116,8 @@ app.post("/login", async (req, res) => {
           });
         }
       );
+    } else {
+      res.status(400).json({ message: "Invalid" });
     }
   }
 });

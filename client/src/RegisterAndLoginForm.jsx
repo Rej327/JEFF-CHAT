@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { UserContext } from "./UserContext.jsx";
 
 export default function RegisterAndLoginForm() {
@@ -7,12 +7,22 @@ export default function RegisterAndLoginForm() {
   const [password, setPassword] = useState("");
   const [isLoginOrRegister, setIsLoginOrRegister] = useState("login");
   const { setUsername: setLoggedInUsername, setId } = useContext(UserContext);
-  async function handleSubmit(ev) {
+  const [isError, setIsError] = useState(false);
+
+  function handleSubmit(ev) {
     ev.preventDefault();
     const url = isLoginOrRegister === "register" ? "register" : "login";
-    const { data } = await axios.post(url, { username, password });
-    setLoggedInUsername(username);
-    setId(data.id);
+    axios
+      .post(url, { username, password })
+      .then((res) => {
+        setLoggedInUsername(username);
+        setId(res.data.id);
+      })
+      .catch((err) => {
+        if (err.response.status !== 200) {
+          setIsError(true);
+        }
+      });
   }
   return (
     <div className="bg-green-100 h-screen flex items-center">
@@ -34,6 +44,9 @@ export default function RegisterAndLoginForm() {
           </svg>
           <h1 className="styleHead styleText">Jeff-Chat</h1>
         </div>
+        <h1 className="text-center text-red-500">
+          {isError && "Invalid User or Pass"}
+        </h1>
         <input
           value={username}
           onChange={(ev) => setUsername(ev.target.value)}
