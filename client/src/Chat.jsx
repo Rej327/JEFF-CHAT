@@ -23,7 +23,7 @@ export default function Chat() {
     ws.addEventListener("message", handleMessage);
     ws.addEventListener("close", () => {
       setTimeout(() => {
-        console.log("Disconnected. Trying to reconnect.");
+        console.log("Reconnecting...");
         connectToWs();
       }, 1000);
     });
@@ -46,6 +46,19 @@ export default function Chat() {
       }
     }
   }
+  //delete
+  function deleteMessage(id) {
+    axios
+      .delete(`/messages/${id}`)
+      .then((res) => {
+        setMessages((prev) => prev.filter((message) => message._id !== id));
+        ws.send(JSON.stringify({ type: "delete", messageId: id }));
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
+
   function logout() {
     axios.post("/logout").then(() => {
       setWs(null);
@@ -206,6 +219,27 @@ export default function Chat() {
                       }
                     >
                       {message.text}
+                      <div>
+                        {message.sender === id ? (
+                          <label className="w-full text-gray-600">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke-width="1.5"
+                              stroke="currentColor"
+                              className="w-4 h-4 ml-auto font-bold w-fit cursor-pointer hover:text-red-500"
+                              onClick={() => deleteMessage(message._id)}
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                              />
+                            </svg>
+                          </label>
+                        ) : null}
+                      </div>
                       {message.file && (
                         <div className="">
                           <div
@@ -240,14 +274,7 @@ export default function Chat() {
         </div>
         {!!selectedUserId && (
           <form className="flex gap-2" onSubmit={sendMessage}>
-            <input
-              type="text"
-              value={newMessageText}
-              onChange={(ev) => setNewMessageText(ev.target.value)}
-              placeholder="Type your message here"
-              className="bg-green-100 flex-grow border rounded-sm p-2"
-            />
-            <label className="bg-green-200 p-2 text-gray-600 cursor-pointer rounded-sm border border-green-200">
+            <label className="bg-green-200 p-2 text-gray-600 cursor-pointer rounded-lg border border-green-200 hover:bg-green-300">
               <input type="file" className="hidden" onChange={sendFile} />
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -264,9 +291,51 @@ export default function Chat() {
                 />
               </svg>
             </label>
+            <label className="bg-green-200 p-2 text-gray-600 cursor-pointer rounded-lg border border-green-200 hover:bg-green-300">
+              <input className="hidden" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-6 h-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
+                />
+              </svg>
+            </label>
+            <label className="bg-green-200 p-2 text-gray-600 cursor-pointer rounded-lg border border-green-200 hover:bg-green-300">
+              <input className="hidden" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-6 h-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
+                />
+              </svg>
+            </label>
+            <input
+              type="text"
+              value={newMessageText}
+              onChange={(ev) => setNewMessageText(ev.target.value)}
+              placeholder="Type your message here"
+              className="bg-green-100 flex-grow border rounded-sm p-2"
+            />
+
             <button
               type="submit"
-              className="bg-green-500 p-2 text-white rounded-sm"
+              className="bg-green-500 p-2 text-white rounded-lg hover:bg-green-700"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

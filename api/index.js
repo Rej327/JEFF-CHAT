@@ -56,6 +56,32 @@ app.get("/messages/:userId", async (req, res) => {
   res.json(messages);
 });
 
+// DELETE a message
+app.delete("/messages/:messageId", async (req, res) => {
+  const { messageId } = req.params;
+  const userData = await getUserDataFromRequest(req);
+  const ourUserId = userData.userId;
+
+  try {
+    // Check if the message exists and belongs to the user
+    const message = await Message.findOne({
+      _id: messageId,
+      sender: ourUserId,
+    });
+    if (!message) {
+      return res.status(404).json({ error: "Message not found" });
+    }
+
+    // Delete the message
+    await message.remove();
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 app.get("/people", async (req, res) => {
   const users = await User.find({}, { _id: 1, username: 1 });
   res.json(users);
@@ -177,6 +203,31 @@ wss.on("connection", (connection, req) => {
     }
   }
 
+  //DELETE
+  connection.on("delete", async (message) => {
+    let messageData;
+    try {
+      messageData = JSON.parse(message.toString());
+    } catch (error) {
+      console.error("Error parsing message:", error);
+      return;
+    }
+
+    const { type, message: messageObj, messageId } = messageData || {};
+
+    if (type === "new") {
+      // handle new message
+    } else if (type === "delete") {
+      // handle message deletion
+      await Message.deleteOne({ _id: messageId });
+      wss.clients.forEach((client) => {
+        client.send(JSON.stringify({ type: "delete", messageId }));
+      });
+    } else {
+      console.log("Unknown message type:", type);
+    }
+  });
+
   connection.on("message", async (message) => {
     const messageData = JSON.parse(message.toString());
     const { recipient, text, file } = messageData;
@@ -189,7 +240,7 @@ wss.on("connection", (connection, req) => {
       const path = __dirname + "/files/" + filename;
       const bufferData = new Buffer(file.data.split(",")[1], "base64");
       fs.writeFile(path, bufferData, () => {
-        console.log("file saved:" + path);
+        console.log("File uploaded:" + path);
       });
     }
     if (recipient && (text || file)) {
@@ -199,7 +250,7 @@ wss.on("connection", (connection, req) => {
         text,
         file: file ? filename : null,
       });
-      console.log("created message");
+      console.log("Message create!");
       [...wss.clients]
         .filter((c) => c.userId === recipient)
         .forEach((c) =>
