@@ -44,8 +44,8 @@ export default function RegisterAndLoginForm() {
           </svg>
           <h1 className="styleHead styleText">Jeff-Chat</h1>
         </div>
-        <h1 className="text-center text-red-500">
-          {isError && "Invalid User or Pass"}
+        <h1 className="text-center text-red-500 font-bold py-2">
+          {isError && "Invalid Username or Password!"}
         </h1>
         <input
           value={username}
