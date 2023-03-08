@@ -139,10 +139,10 @@ export default function Chat() {
   return (
     <div className="flex h-screen">
       <div className="bg-green-100 w-1/5  flex flex-col">
-        <div className="flex-grow">
-          <div className="bg-green-200">
-            <Logo />
-          </div>
+        <div className="bg-green-200">
+          <Logo />
+        </div>
+        <div className="flex-grow overflow-x-hidden overflow-scroll scrollStyle border-2">
           {Object.keys(onlinePeopleExclOurUser).map((userId) => (
             <Contact
               key={userId}
@@ -202,7 +202,7 @@ export default function Chat() {
           )}
           {!!selectedUserId && (
             <div className="relative h-full">
-              <div className="overflow-y-scroll absolute top-0 left-0 right-0 bottom-2">
+              <div className="overflow-y-scroll absolute top-0 left-0 right-0 px-2 bottom-2 scrollStyle ">
                 {messagesWithoutDupes.map((message) => (
                   <div
                     key={message._id}
