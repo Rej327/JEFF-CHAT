@@ -4,7 +4,7 @@ Made by: Jefferson Resurreccion
 
 Download or clone my project
 
-https://github.com/Rej327/JEFF-CHAT-APP.git
+https://github.com/Rej327/JEFF-CHAT.git
 Go to the poject directory
 cd jeff-chat
 
