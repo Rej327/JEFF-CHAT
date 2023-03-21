@@ -1,6 +1,8 @@
 import { useContext, useState } from "react";
 import axios, { AxiosError } from "axios";
 import { UserContext } from "./UserContext.jsx";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function RegisterAndLoginForm() {
   const [username, setUsername] = useState("");
@@ -8,24 +10,52 @@ export default function RegisterAndLoginForm() {
   const [isLoginOrRegister, setIsLoginOrRegister] = useState("login");
   const { setUsername: setLoggedInUsername, setId } = useContext(UserContext);
   const [isError, setIsError] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  function handleSubmit(ev) {
+  const handleSubmit = (ev) => {
     ev.preventDefault();
     const url = isLoginOrRegister === "register" ? "register" : "login";
     axios
       .post(url, { username, password })
       .then((res) => {
-        setLoggedInUsername(username);
-        setId(res.data.id);
+        if (res.status === 200) {
+          setIsSuccess(true);
+          toast.success("Login Success!", {
+            position: "top-center",
+            autoClose: 1000,
+            hideProgressBar: false,
+            closeButton: false,
+            pauseOnHover: true,
+            draggable: false,
+            progress: undefined,
+            theme: "light",
+          });
+          setTimeout(() => {
+            setLoggedInUsername(username);
+            setId(res.data.id);
+          }, 1500);
+        }
       })
       .catch((err) => {
         if (err.response.status !== 200) {
           setIsError(true);
+          toast.error("Account not found!", {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            progress: undefined,
+            theme: "light",
+          });
         }
       });
-  }
+  };
   return (
     <div className="bg-green-100 h-screen flex items-center">
+      {isError && <ToastContainer />}
+      {isSuccess && <ToastContainer />}
       <form className="w-64 mx-auto mb-12" onSubmit={handleSubmit}>
         <div className="flex flex-row">
           <svg
@@ -44,9 +74,6 @@ export default function RegisterAndLoginForm() {
           </svg>
           <h1 className="styleHead styleText">Jeff-Chat</h1>
         </div>
-        <h1 className="text-center text-red-500 font-bold py-2">
-          {isError && "Invalid Username or Password!"}
-        </h1>
         <input
           value={username}
           onChange={(ev) => setUsername(ev.target.value)}
