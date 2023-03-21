@@ -17,7 +17,7 @@ export default function Chat() {
   useEffect(() => {
     connectToWs();
   }, [selectedUserId]);
-  function connectToWs() {
+  const connectToWs = () => {
     const ws = new WebSocket("ws://localhost:5000");
     setWs(ws);
     ws.addEventListener("message", handleMessage);
@@ -27,15 +27,15 @@ export default function Chat() {
         connectToWs();
       }, 1000);
     });
-  }
-  function showOnlinePeople(peopleArray) {
+  };
+  const showOnlinePeople = (peopleArray) => {
     const people = {};
     peopleArray.forEach(({ userId, username }) => {
       people[userId] = username;
     });
     setOnlinePeople(people);
-  }
-  function handleMessage(ev) {
+  };
+  const handleMessage = (ev) => {
     const messageData = JSON.parse(ev.data);
     console.log({ ev, messageData });
     if ("online" in messageData) {
@@ -45,9 +45,9 @@ export default function Chat() {
         setMessages((prev) => [...prev, { ...messageData }]);
       }
     }
-  }
+  };
   //delete
-  function deleteMessage(id) {
+  const deleteMessage = (id) => {
     axios
       .delete(`/messages/${id}`)
       .then((res) => {
@@ -57,16 +57,16 @@ export default function Chat() {
       .catch((err) => {
         console.error(err);
       });
-  }
+  };
 
-  function logout() {
+  const logout = () => {
     axios.post("/logout").then(() => {
       setWs(null);
       setId(null);
       setUsername(null);
     });
-  }
-  function sendMessage(ev, file = null) {
+  };
+  const sendMessage = (ev, file = null) => {
     if (ev) ev.preventDefault();
     ws.send(
       JSON.stringify({
@@ -91,8 +91,8 @@ export default function Chat() {
         },
       ]);
     }
-  }
-  function sendFile(ev) {
+  };
+  const sendFile = (ev) => {
     const reader = new FileReader();
     reader.readAsDataURL(ev.target.files[0]);
     reader.onload = () => {
@@ -101,7 +101,7 @@ export default function Chat() {
         data: reader.result,
       });
     };
-  }
+  };
 
   useEffect(() => {
     const div = divUnderMessages.current;
